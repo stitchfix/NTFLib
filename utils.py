@@ -4,7 +4,7 @@ import numba
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 
-def top_sparse3(x_indices, x_vals, out, beta, factor, model, A, B):
+def top_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
     # In einstein notation with factor=0 this is 'bz,cz,abc->az'
     # In einstein notation with factor=1 this is 'az,cz,abc->bz'
     # In einstein notation with factor=2 this is 'az,bz,abc->cz'
@@ -13,15 +13,18 @@ def top_sparse3(x_indices, x_vals, out, beta, factor, model, A, B):
     assert factor in (0, 1, 2), "Factor index must be < rank"
     if factor == 0:
         for (a, b, c), val in zip(x_indices, x_vals):
-            temp = val * A[b, :] * B[c, :] * (model[a, b, c] ** (beta - 2))
+            core = np.sum(A[a, :] * B[b, :] * C[c, :])
+            temp = val * B[b, :] * C[c, :] * (core ** (beta - 2))
             out[a, :] += temp
     if factor == 1:
         for (a, b, c), val in zip(x_indices, x_vals):
-            temp = val * A[a, :] * B[c, :] * (model[a, b, c] ** (beta - 2))
+            core = np.sum(A[a, :] * B[b, :] * C[c, :])
+            temp = val * A[a, :] * C[c, :] * (core ** (beta - 2))
             out[b, :] += temp
     elif factor == 2:
         for (a, b, c), val in zip(x_indices, x_vals):
-            temp = val * A[a, :] * B[b, :] * (model[a, b, c] ** (beta - 2))
+            core = np.sum(A[a, :] * B[b, :] * C[c, :])
+            temp = val * A[a, :] * B[b, :] * (core ** (beta - 2))
             out[c, :] += temp
 
 

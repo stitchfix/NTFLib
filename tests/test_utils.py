@@ -45,11 +45,8 @@ class TestUtils(unittest.TestCase):
         top_d = np.einsum(einstr, *mode_factors)
 
         # Now get the top numerator for the sparse method
-        mode_factors = [a for j, a in enumerate(factors) if j != factor]
         top_s = np.zeros(factors[factor].shape, dtype=np.float32)
-        utils.top_sparse3(x_indices, x_vals, top_s, beta, factor, model,
-                          mode_factors[0], mode_factors[1])
-
+        utils.top_sparse3(x_indices, x_vals, top_s, beta, factor, *factors)
 
         result = np.allclose(top_d, top_s, rtol=1e-5)
         self.assertTrue(result)
