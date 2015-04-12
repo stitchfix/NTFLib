@@ -34,6 +34,7 @@ class BetaNTF():
                 model = utils.parafac(self._factors)
                 # Get all factors that aren't the current factor
                 fctrs = [a for j, a in enumerate(self._factors) if j != factor]
+                assert len(fctrs) == self.rank - 1
                 # Get the numerator for the update multiplier
                 top = np.zeros(self.shape, dtype=np.float32)
                 bot = np.zeros(self.shape, dtype=np.float32)

@@ -4,15 +4,25 @@ import numba
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 
-def top_sparse3(x_indices, x_vals, model, out, beta, A, B):
-    # For example, for factor B this is summing over z:
-    # num[a, b, c] = A_az C_cz (X * model** (beta-2) )_abc
-    # However, as X is sparse we only consider it's coordinates
-    for (a, b, c), val in zip(x_indices, x_vals):
-        AB = np.dot(A[a, :], B[b, :])
-        out[a, b, c] = AB
-        out[a, b, c] *= val
-        out[a, b, c] *= model[a, b, c] ** (beta - 2)
+def top_sparse3(x_indices, x_vals, out, beta, factor, model, A, B):
+    # In einstein notation with factor=0 this is 'bz,cz,abc->az'
+    # In einstein notation with factor=1 this is 'az,cz,abc->bz'
+    # In einstein notation with factor=2 this is 'az,bz,abc->cz'
+    # However, you can use to your advantage that the
+    # x_indices are sparesely defined as [a, b, c]
+    assert factor in (0, 1, 2), "Factor index must be < rank"
+    if factor == 0:
+        for (a, b, c), val in zip(x_indices, x_vals):
+            temp = val * A[b, :] * B[c, :] * (model[a, b, c] ** (beta - 2))
+            out[a, :] += temp
+    if factor == 1:
+        for (a, b, c), val in zip(x_indices, x_vals):
+            temp = val * A[a, :] * B[c, :] * (model[a, b, c] ** (beta - 2))
+            out[b, :] += temp
+    elif factor == 2:
+        for (a, b, c), val in zip(x_indices, x_vals):
+            temp = val * A[a, :] * B[b, :] * (model[a, b, c] ** (beta - 2))
+            out[c, :] += temp
 
 
 def bot_sparse3(x_indices, x_vals, model, out, beta, A, B,):
