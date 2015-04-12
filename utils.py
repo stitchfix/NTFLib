@@ -1,35 +1,37 @@
 import numpy as np
 import numba
 
+alphabet = 'abcdefghijklmnopqrstuvwxyz'
+
+
 def put3(indices, source, out):
     for j, (a, b, c) in enumerate(indices):
         out[j] = source[a, b, c]
 
-def top_sparse3(X_indices, X_vals, model, out, A, B):
+
+def top_sparse3(x_indices, x_vals, model, out, beta, A, B):
     # For example, for factor B this is summing over z:
     # num[a, b, c] = A_az C_cz (X * model** (beta-2) )_abc
     # However, as X is sparse we only consider it's coordinates
-    for (a, b, c), val in zip(X_indices, X_vals):
+    for (a, b, c), val in zip(x_indices, x_vals):
         AB = np.dot(A[a, :], B[b, :])
         out[a, b, c] = AB
         out[a, b, c] *= val
         out[a, b, c] *= model[a, b, c] ** (beta - 2)
 
-def bot_sparse3(X_indices, X_vals, model, out, A, B):
+
+def bot_sparse3(x_indices, x_vals, model, out, beta, A, B,):
     # Similar to the numerator top_sparse
     # but solving A_az B_bz (model ** (beta - 1))_abc
-    for (a, b, c), val in zip(X_indices, X_vals):
+    for (a, b, c), val in zip(x_indices, x_vals):
         AB = np.dot(A[a, :], B[b, :])
         out[a, b, c] = AB
         out[a, b, c] *= model[a, b, c] ** (beta - 1)
 
-def top_sparse(X_indices, X_vals, model, out, *factors):
-    top_func = tops[len(X_indices[0])]
-    bot_func = tops[len(X_indices[0])]
-
 tops = {3: top_sparse3}
 bots = {3: bot_sparse3}
 puts = {3: put3}
+
 
 def parafac(factors):
     """Computes the parafac model of a list of matrices
@@ -51,19 +53,19 @@ def parafac(factors):
     rank = len(factors)
     request = ''
     for factor in range(rank):
-        request += string.lowercase[factor] + 'z,'
-    request = request[:-1] + '->' + string.lowercase[:rank]
+        request += alphabet[factor] + 'z,'
+    request = request[:-1] + '->' + alphabet[:rank]
     return np.einsum(request, *factors, dtype=np.float32)
 
 
-def beta_divergence(X_indices, X_ravel, b, beta):
+def beta_divergence(x_indices, x_ravel, b, beta):
     """Computes the total beta-divergence between the current model and
     a sparse X
     """
-    rank = len(X_indices[0])
-    b_ravel = np.zeros(X_ravel.shape)
-    puts[rank](X_indices, b, b_ravel)
-    a, b = X_ravel, b_ravel
+    rank = len(x_indices[0])
+    b_ravel = np.zeros(x_ravel.shape)
+    puts[rank](x_indices, b, b_ravel)
+    a, b = x_ravel, b_ravel
     idx = np.isfinite(a)
     idx &= np.isfinite(b)
     idx &= a > 0
