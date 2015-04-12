@@ -3,6 +3,8 @@ Sparse Beta-Divergence Tensor Factorization Library
 
 ![Build Status](https://api.travis-ci.org/cemoody/NTFLib.svg?branch=master)
 
+![NTFLib](decomposition.png)
+
 Based off of this [beta-NTF project](https://code.google.com/p/beta-ntf/) this library is 
 specially-built to handle tensors where the sparsity implies missing data. Most
 libraries are formulated around the handling of images which are dense or nearly
