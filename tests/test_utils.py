@@ -32,21 +32,21 @@ def generate_dataset():
 
 class TestUtils(unittest.TestCase):
     def test_top_sparse3(self):
-        factor = 0
-        beta = 1
-        shape, rank, k, factors, x, x_indices, x_vals = generate_dataset()
-        model = utils.parafac(factors)
+        for beta in [1, 1.5, 2]:
+            for factor in range(3):
+                shape, rank, k, factors, x, x_indices, x_vals = generate_dataset()
+                model = utils.parafac(factors)
 
-        # Generate the top numerator for the reference dense method
-        einstr = generate_dense(rank, factor)
-        # Get all factors that aren't the current factor
-        mode_factors = [a for j, a in enumerate(factors) if j != factor]
-        mode_factors += [x * (model ** (beta - 2.)), ]
-        top_d = np.einsum(einstr, *mode_factors)
+                # Generate the top numerator for the reference dense method
+                einstr = generate_dense(rank, factor)
+                # Get all factors that aren't the current factor
+                mode_factors = [a for j, a in enumerate(factors) if j != factor]
+                mode_factors += [x * (model ** (beta - 2.)), ]
+                top_d = np.einsum(einstr, *mode_factors)
 
-        # Now get the top numerator for the sparse method
-        top_s = np.zeros(factors[factor].shape, dtype=np.float32)
-        utils.top_sparse3(x_indices, x_vals, top_s, beta, factor, *factors)
+                # Now get the top numerator for the sparse method
+                top_s = np.zeros(factors[factor].shape, dtype=np.float32)
+                utils.top_sparse3(x_indices, x_vals, top_s, beta, factor, *factors)
 
-        result = np.allclose(top_d, top_s, rtol=1e-5)
-        self.assertTrue(result)
+                result = np.allclose(top_d, top_s, rtol=1e-5)
+                self.assertTrue(result)
