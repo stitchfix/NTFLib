@@ -1,5 +1,4 @@
 import numpy as np
-import numba
 import utils
 
 # This is a form of Non-negative Tensor Factorization
