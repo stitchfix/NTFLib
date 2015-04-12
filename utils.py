@@ -28,13 +28,26 @@ def top_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
             out[c, :] += temp
 
 
-def bot_sparse3(x_indices, x_vals, model, out, beta, A, B,):
-    # Similar to the numerator top_sparse
-    # but solving A_az B_bz (model ** (beta - 1))_abc
-    for (a, b, c), val in zip(x_indices, x_vals):
-        AB = np.dot(A[a, :], B[b, :])
-        out[a, b, c] = AB
-        out[a, b, c] *= model[a, b, c] ** (beta - 1)
+def bot_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
+    # This is the same as top_ssparse but in this case 
+    # we don't have the `val` term in the sum
+    assert factor in (0, 1, 2), "Factor index must be < rank"
+    if factor == 0:
+        for (a, b, c), val in zip(x_indices, x_vals):
+            core = np.sum(A[a, :] * B[b, :] * C[c, :])
+            temp = B[b, :] * C[c, :] * (core ** (beta - 2))
+            out[a, :] += temp
+    if factor == 1:
+        for (a, b, c), val in zip(x_indices, x_vals):
+            core = np.sum(A[a, :] * B[b, :] * C[c, :])
+            temp = A[a, :] * C[c, :] * (core ** (beta - 2))
+            out[b, :] += temp
+    elif factor == 2:
+        for (a, b, c), val in zip(x_indices, x_vals):
+            core = np.sum(A[a, :] * B[b, :] * C[c, :])
+            temp = A[a, :] * B[b, :] * (core ** (beta - 2))
+            out[c, :] += temp
+
 
 tops = {3: top_sparse3}
 bots = {3: bot_sparse3}

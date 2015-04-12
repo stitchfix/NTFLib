@@ -50,3 +50,24 @@ class TestUtils(unittest.TestCase):
 
                 result = np.allclose(top_d, top_s, rtol=1e-5)
                 self.assertTrue(result)
+
+
+    def test_bot_sparse3(self):
+        for beta in [1, 1.5, 2]:
+            for factor in range(3):
+                shape, rank, k, factors, x, x_indices, x_vals = generate_dataset()
+                model = utils.parafac(factors)
+
+                # Generate the bottom denominator for the reference dense method
+                einstr = generate_dense(rank, factor)
+                # Get all factors that aren't the current factor
+                mode_factors = [a for j, a in enumerate(factors) if j != factor]
+                mode_factors += [(model ** (beta - 2.)), ]
+                bot_d = np.einsum(einstr, *mode_factors)
+
+                # Now get the bottom denominator for the sparse method
+                bot_s = np.zeros(factors[factor].shape, dtype=np.float32)
+                utils.bot_sparse3(x_indices, x_vals, bot_s, beta, factor, *factors)
+
+                result = np.allclose(bot_d, bot_s, rtol=1e-5)
+                self.assertTrue(result)
