@@ -34,17 +34,17 @@ def bot_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
     if factor == 0:
         for (a, b, c), val in zip(x_indices, x_vals):
             core = np.sum(A[a, :] * B[b, :] * C[c, :])
-            temp = B[b, :] * C[c, :] * (core ** (beta - 2))
+            temp = B[b, :] * C[c, :] * (core ** (beta - 1))
             out[a, :] += temp
     if factor == 1:
         for (a, b, c), val in zip(x_indices, x_vals):
             core = np.sum(A[a, :] * B[b, :] * C[c, :])
-            temp = A[a, :] * C[c, :] * (core ** (beta - 2))
+            temp = A[a, :] * C[c, :] * (core ** (beta - 1))
             out[b, :] += temp
     elif factor == 2:
         for (a, b, c), val in zip(x_indices, x_vals):
             core = np.sum(A[a, :] * B[b, :] * C[c, :])
-            temp = A[a, :] * B[b, :] * (core ** (beta - 2))
+            temp = A[a, :] * B[b, :] * (core ** (beta - 1))
             out[c, :] += temp
 
 
@@ -97,6 +97,7 @@ def beta_divergence(x_indices, x_vals, b, beta):
     return (1. / beta / (beta - 1.) * (a ** beta + (beta - 1.)
             * b ** beta - beta * a * b ** (beta - 1)))
 
+
 def beta_divergence_dense(a, b, beta):
     if beta == 0:
         return a / b - np.log(a / b) - 1
@@ -104,4 +105,32 @@ def beta_divergence_dense(a, b, beta):
         return a * (np.log(a) - np.log(b)) + b - a
     return (1. / beta / (beta - 1.) * (a ** beta + (beta - 1.)
             * b ** beta - beta * a * b ** (beta - 1)))
+
+
+def generate_dense(rank, mode):
+    # will be : 'az,cz,abc->bz'
+    # when mode=1
+    request = ''
+    for r in range(rank):
+        if r == mode: continue
+        request += alphabet[r] + 'z,'
+    request += alphabet[:rank] + '->'
+    request += alphabet[mode] + 'z'
+    return request
+
+
+def gen_rand(s, k):
+    d = np.abs(np.random.randn(s * k)).reshape((s, k))
+    return d.astype(np.float32)
+
+
+def generate_dataset(k=2):
+    shape = (4, 5, 6)
+    rank = len(shape)
+    init = [gen_rand(s, k) for s in shape]
+    hidden = [gen_rand(s, k) for s in shape]
+    x = parafac(hidden)
+    x_indices = np.array([a.ravel() for a in np.indices(shape)]).T
+    x_vals = x.ravel()
+    return shape, rank, k, init, x, x_indices, x_vals
 
