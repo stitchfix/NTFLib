@@ -35,12 +35,12 @@ before_install:
     - conda update --yes conda
 
 install:
-    - sudo apt-get install -qq libeigen3-dev
-
-    - conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
-    - source activate test
-
-    - conda install --yes numpy=$NUMPY_VERSION scipy nose pip Cython
+    - conda create --yes -n testing python=$TRAVIS_PYTHON_VERSION
+    - source activate testing
+    - conda install --yes numpy=$NUMPY_VERSION nose pip 
 
 script:
+    - ls
+    - pwd
+    - env | sort
     - nosetests -v
