@@ -29,7 +29,7 @@ def top_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
 
 
 def bot_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
-    # This is the same as top_ssparse but in this case 
+    # This is the same as top_ssparse but in this case
     # we don't have the `val` term in the sum
     assert factor in (0, 1, 2), "Factor index must be < rank"
     if factor == 0:
