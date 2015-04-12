@@ -71,3 +71,15 @@ class TestUtils(unittest.TestCase):
 
                 result = np.allclose(bot_d, bot_s, rtol=1e-5)
                 self.assertTrue(result)
+
+
+    def test_beta_divergence(self):
+        shape, rank, k, factors, x, x_indices, x_vals = generate_dataset()
+        for beta in [1, 1.5, 2]:
+            a = x
+            b = utils.parafac(factors)
+            div_d = utils.beta_divergence_dense(a, b, beta)
+            div_s = utils.beta_divergence(x_indices, x_vals, b, beta)
+            div_s.shape = div_d.shape
+            close = np.allclose(div_s, div_d, rtol=1e-5)
+            self.assertTrue(close)
