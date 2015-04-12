@@ -4,11 +4,6 @@ import numba
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 
-def put3(indices, source, out):
-    for j, (a, b, c) in enumerate(indices):
-        out[j] = source[a, b, c]
-
-
 def top_sparse3(x_indices, x_vals, model, out, beta, A, B):
     # For example, for factor B this is summing over z:
     # num[a, b, c] = A_az C_cz (X * model** (beta-2) )_abc
@@ -30,7 +25,6 @@ def bot_sparse3(x_indices, x_vals, model, out, beta, A, B,):
 
 tops = {3: top_sparse3}
 bots = {3: bot_sparse3}
-puts = {3: put3}
 
 
 def parafac(factors):
@@ -63,8 +57,7 @@ def beta_divergence(x_indices, x_ravel, b, beta):
     a sparse X
     """
     rank = len(x_indices[0])
-    b_ravel = np.zeros(x_ravel.shape)
-    puts[rank](x_indices, b, b_ravel)
+    b_ravel = b[x_indices]
     a, b = x_ravel, b_ravel
     idx = np.isfinite(a)
     idx &= np.isfinite(b)
