@@ -1,5 +1,5 @@
 import numpy as np
-import utils
+from . import utils
 
 # This is a form of Non-negative Tensor Factorization
 # that minimizes the beta-divergence. Typical NTF specializes

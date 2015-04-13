@@ -1,7 +1,7 @@
 import unittest
 import utils
 import numpy as np
-from betantf import BetaNTF
+from ntflib import betantf
 
 def rmse(x, y):
     return np.sqrt((x - y)**2.0).sum()
@@ -9,14 +9,14 @@ def rmse(x, y):
 class TestNTFLib(unittest.TestCase):
     def test_init(self):
         shape = (10, 6, 2)
-        bnf = BetaNTF(shape)
+        bnf = betantf.BetaNTF(shape)
         for i, s in enumerate(shape):
             self.assertTrue(bnf._factors[i].shape[0], s)
 
     def test_fit(self):
         shape, rank, k, factors, x, x_indices, x_vals = \
                 utils.generate_dataset()
-        bnf = BetaNTF(shape, n_components=k)
+        bnf = betantf.BetaNTF(shape, n_components=k)
         before = bnf.score(x_indices, x_vals)
         initial = bnf.impute()
         reconstructed = bnf.fit(x_indices, x_vals)
