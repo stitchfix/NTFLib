@@ -59,7 +59,7 @@ class BetaNTF():
                 self._factors[factor] *= frac
                 assert np.all(np.isfinite(self._factors[factor]))
                 self.log(it, factor)
-        return self.impute()
+        return self.impute(x_indices)
 
     def score(self, x_indices=None, x_vals=None):
         if x_indices is None:
@@ -70,8 +70,10 @@ class BetaNTF():
                                       *self._factors)
         return score.sum()
 
-    def impute(self):
-        return utils.parafac(self._factors)
+    def impute(self, x_indices):
+        x_vals = np.zeros(x_indices.shape[0])
+        utils.parafac_sparse(x_indices, x_vals, *self._factors)
+        return x_vals
 
     def log(self, it, factor, score=None):
         if score is None:

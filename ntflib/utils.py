@@ -166,7 +166,7 @@ def parafac(factors):
 
 
 @numba.jit(nopython=True)
-def parafac_sparse(x_indices, A, B, C, b_vals):
+def parafac_sparse(x_indices, b_vals, A, B, C):
     rows = x_indices.shape[0]
     K = A.shape[1]
     for row in range(rows):
@@ -185,7 +185,7 @@ def beta_divergence(x_indices, x_vals, beta, A, B, C):
     """
     rank = len(x_indices[0])
     b_vals = np.zeros(x_vals.shape, dtype=np.float32)
-    parafac_sparse(x_indices, A, B, C, b_vals)
+    parafac_sparse(x_indices, b_vals, A, B, C)
     a, b = x_vals, b_vals
     idx = np.isfinite(a)
     idx &= np.isfinite(b)

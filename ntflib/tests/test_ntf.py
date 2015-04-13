@@ -18,8 +18,10 @@ class TestNTFLib(unittest.TestCase):
                 utils.generate_dataset()
         bnf = betantf.BetaNTF(shape, n_components=k)
         before = bnf.score(x_indices, x_vals)
-        initial = bnf.impute()
+        initial = bnf.impute(x_indices)
+        initial.shape = x.shape
         reconstructed = bnf.fit(x_indices, x_vals)
+        reconstructed.shape = x.shape
         after = bnf.score()
         self.assertTrue(after < before)
         e_0 = rmse(x, initial)
