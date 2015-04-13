@@ -23,7 +23,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
-                temp = val * B[b, k] * C[c, k] * (core ** (beta - 2))
+                temp = val * B[b, k] * C[c, k] * (core ** (beta - 2.))
                 out[a, k] += temp
     if factor == 1:
         for row in range(rows):
@@ -35,7 +35,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
-                temp = val * A[a, k] * C[c, k] * (core ** (beta - 2))
+                temp = val * A[a, k] * C[c, k] * (core ** (beta - 2.))
                 out[b, k] += temp
     elif factor == 2:
         for row in range(rows):
@@ -47,7 +47,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
-                temp = val * A[a, k] * B[b, k] * (core ** (beta - 2))
+                temp = val * A[a, k] * B[b, k] * (core ** (beta - 2.))
                 out[c, k] += temp
 
 
@@ -136,8 +136,8 @@ def bot_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
             out[c, :] += temp
 
 
-tops = {3: top_sparse3}
-bots = {3: bot_sparse3}
+tops = {3: top_sparse3_numba}
+bots = {3: bot_sparse3_numba}
 
 
 def parafac(factors):
