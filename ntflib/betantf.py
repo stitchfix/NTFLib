@@ -42,8 +42,6 @@ class BetaNTF():
         for it in range(self.n_iters):
             # Update each factor individually
             for factor in range(self.rank):
-                # Get current model
-                model = utils.parafac(self._factors)
                 # Get all factors that aren't the current factor
                 fctrs = [a for j, a in enumerate(self._factors) if j != factor]
                 assert len(fctrs) == self.rank - 1
@@ -64,9 +62,8 @@ class BetaNTF():
             x_indices = self.x_indices
         if x_vals is None:
             x_vals = self.x_vals
-        model = utils.parafac(self._factors)
-        score = utils.beta_divergence(x_indices, x_vals, model,
-                                      self.beta)
+        score = utils.beta_divergence(x_indices, x_vals, self.beta, 
+                                      *self._factors)
         return score.sum()
 
     def impute(self):

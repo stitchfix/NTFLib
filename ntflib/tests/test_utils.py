@@ -1,6 +1,6 @@
 import unittest
-import utils
 import numpy as np
+from ntflib import utils
 
 
 class TestUtils(unittest.TestCase):
@@ -55,7 +55,7 @@ class TestUtils(unittest.TestCase):
             a = x
             b = utils.parafac(factors)
             div_d = utils.beta_divergence_dense(a, b, beta)
-            div_s = utils.beta_divergence(x_indices, x_vals, b, beta)
+            div_s = utils.beta_divergence(x_indices, x_vals, beta, *factors)
             div_s.shape = div_d.shape
             close = np.allclose(div_s, div_d, rtol=1e-5)
             self.assertTrue(close)

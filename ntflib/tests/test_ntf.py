@@ -1,7 +1,7 @@
 import unittest
-import utils
 import numpy as np
 from ntflib import betantf
+from ntflib import utils
 
 def rmse(x, y):
     return np.sqrt((x - y)**2.0).sum()

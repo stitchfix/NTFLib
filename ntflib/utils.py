@@ -77,12 +77,14 @@ def parafac(factors):
     return np.einsum(request, *factors, dtype=np.float32)
 
 
-def beta_divergence(x_indices, x_vals, b, beta):
+def beta_divergence(x_indices, x_vals, beta, A, B, C):
     """Computes the total beta-divergence between the current model and
     a sparse X
     """
     rank = len(x_indices[0])
-    b_vals = b[x_indices[:,0], x_indices[:, 1], x_indices[:, 2]]
+    b_vals = np.zeros(x_vals.shape, dtype=np.float32)
+    for i, ((a, b, c), val) in enumerate(zip(x_indices, x_vals)):
+        b_vals[i] = np.sum(A[a, :] * B[b, :] * C[c, :])
     a, b = x_vals, b_vals
     idx = np.isfinite(a)
     idx &= np.isfinite(b)
