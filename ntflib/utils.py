@@ -19,7 +19,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             b = x_indices[row, 1]
             c = x_indices[row, 2]
             val = x_vals[row]
-            core = 0
+            core = 0.0
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -31,7 +31,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             b = x_indices[row, 1]
             c = x_indices[row, 2]
             val = x_vals[row]
-            core = 0
+            core = 0.0
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -43,7 +43,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             b = x_indices[row, 1]
             c = x_indices[row, 2]
             val = x_vals[row]
-            core = 0
+            core = 0.0
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -165,14 +165,27 @@ def parafac(factors):
     return np.einsum(request, *factors, dtype=np.float32)
 
 
+@numba.jit(nopython=True)
+def parafac_sparse(x_indices, A, B, C, b_vals):
+    rows = x_indices.shape[0]
+    K = A.shape[1]
+    for row in range(rows):
+        a = x_indices[row, 0]
+        b = x_indices[row, 1]
+        c = x_indices[row, 2]
+        temp = 0
+        for k in range(K):
+            temp += A[a, k] * B[b, k] * C[c, k]
+        b_vals[row] = temp
+
+
 def beta_divergence(x_indices, x_vals, beta, A, B, C):
     """Computes the total beta-divergence between the current model and
     a sparse X
     """
     rank = len(x_indices[0])
     b_vals = np.zeros(x_vals.shape, dtype=np.float32)
-    for i, ((a, b, c), val) in enumerate(zip(x_indices, x_vals)):
-        b_vals[i] = np.sum(A[a, :] * B[b, :] * C[c, :])
+    parafac_sparse(x_indices, A, B, C, b_vals)
     a, b = x_vals, b_vals
     idx = np.isfinite(a)
     idx &= np.isfinite(b)

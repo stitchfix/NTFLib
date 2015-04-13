@@ -30,6 +30,8 @@ class BetaNTF():
             rank = x_indices[:, col]
             assert rank.max() + 1 == np.unique(rank).shape[0]
         assert len(x_vals) == len(x_indices)
+        assert np.all(np.isfinite(x_vals))
+        assert np.all(x_vals >= 0)
 
     def fit(self, x_indices, x_vals):
         eps = 1e-8
@@ -52,7 +54,9 @@ class BetaNTF():
                           *self._factors)
                 self.botf(x_indices, x_vals, bot, self.beta, factor,
                           *self._factors)
-                self._factors[factor] *= (eps + top) / (eps + bot)
+                frac = (eps + top) / (eps + bot)
+                assert np.all(np.isfinite(frac))
+                self._factors[factor] *= frac
                 assert np.all(np.isfinite(self._factors[factor]))
                 self.log(it, factor)
         return self.impute()
