@@ -22,7 +22,13 @@ class TestUtils(unittest.TestCase):
                 top_s = np.zeros(factors[factor].shape, dtype=np.float32)
                 utils.top_sparse3(x_indices, x_vals, top_s, beta, factor, *factors)
 
+                # Now get the top numerator for the sparse method using numba
+                top_n = np.zeros(factors[factor].shape, dtype=np.float32)
+                utils.top_sparse3_numba(x_indices, x_vals, top_n, beta, factor, *factors)
+
                 result = np.allclose(top_d, top_s, rtol=1e-5)
+                self.assertTrue(result)
+                result = np.allclose(top_d, top_n, rtol=1e-5)
                 self.assertTrue(result)
 
 
@@ -44,7 +50,13 @@ class TestUtils(unittest.TestCase):
                 bot_s = np.zeros(factors[factor].shape, dtype=np.float32)
                 utils.bot_sparse3(x_indices, x_vals, bot_s, beta, factor, *factors)
 
+                # Now get the bottom denominator for the sparse method
+                bot_n = np.zeros(factors[factor].shape, dtype=np.float32)
+                utils.bot_sparse3(x_indices, x_vals, bot_n, beta, factor, *factors)
+
                 result = np.allclose(bot_d, bot_s, rtol=1e-5)
+                self.assertTrue(result)
+                result = np.allclose(bot_d, bot_n, rtol=1e-5)
                 self.assertTrue(result)
 
 

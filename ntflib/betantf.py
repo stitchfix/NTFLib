@@ -62,7 +62,7 @@ class BetaNTF():
             x_indices = self.x_indices
         if x_vals is None:
             x_vals = self.x_vals
-        score = utils.beta_divergence(x_indices, x_vals, self.beta, 
+        score = utils.beta_divergence(x_indices, x_vals, self.beta,
                                       *self._factors)
         return score.sum()
 

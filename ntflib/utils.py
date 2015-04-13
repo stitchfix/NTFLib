@@ -1,6 +1,93 @@
 import numpy as np
+import numba
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
+
+@numba.jit(nopython=True)
+def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
+    # In einstein notation with factor=0 this is 'bz,cz,abc->az'
+    # In einstein notation with factor=1 this is 'az,cz,abc->bz'
+    # In einstein notation with factor=2 this is 'az,bz,abc->cz'
+    # However, you can use to your advantage that the
+    # x_indices are sparesely defined as [a, b, c]
+    # assert factor in (0, 1, 2), "Factor index must be < rank"
+    K = A.shape[1]
+    rows = x_indices.shape[0]
+    if factor == 0:
+        for row in range(rows):
+            a = x_indices[row, 0]
+            b = x_indices[row, 1]
+            c = x_indices[row, 2]
+            val = x_vals[row]
+            core = 0
+            for k in range(K):
+                core += A[a, k] * B[b, k] * C[c, k]
+            for k in range(K):
+                temp = val * B[b, k] * C[c, k] * (core ** (beta - 2))
+                out[a, k] += temp
+    if factor == 1:
+        for row in range(rows):
+            a = x_indices[row, 0]
+            b = x_indices[row, 1]
+            c = x_indices[row, 2]
+            val = x_vals[row]
+            core = 0
+            for k in range(K):
+                core += A[a, k] * B[b, k] * C[c, k]
+            for k in range(K):
+                temp = val * A[a, k] * C[c, k] * (core ** (beta - 2))
+                out[b, k] += temp
+    elif factor == 2:
+        for row in range(rows):
+            a = x_indices[row, 0]
+            b = x_indices[row, 1]
+            c = x_indices[row, 2]
+            val = x_vals[row]
+            core = 0
+            for k in range(K):
+                core += A[a, k] * B[b, k] * C[c, k]
+            for k in range(K):
+                temp = val * A[a, k] * B[b, k] * (core ** (beta - 2))
+                out[c, k] += temp
+
+
+@numba.jit(nopython=True)
+def bot_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
+    K = A.shape[1]
+    rows = x_indices.shape[0]
+    if factor == 0:
+        for row in range(rows):
+            a = x_indices[row, 0]
+            b = x_indices[row, 1]
+            c = x_indices[row, 2]
+            core = 0
+            for k in range(K):
+                core += A[a, k] * B[b, k] * C[c, k]
+            for k in range(K):
+                temp = B[b, k] * C[c, k] * (core ** (beta - 1))
+                out[a, k] += temp
+    if factor == 1:
+        for row in range(rows):
+            a = x_indices[row, 0]
+            b = x_indices[row, 1]
+            c = x_indices[row, 2]
+            core = 0
+            for k in range(K):
+                core += A[a, k] * B[b, k] * C[c, k]
+            for k in range(K):
+                temp = A[a, k] * C[c, k] * (core ** (beta - 1))
+                out[b, k] += temp
+    elif factor == 2:
+        for row in range(rows):
+            a = x_indices[row, 0]
+            b = x_indices[row, 1]
+            c = x_indices[row, 2]
+            core = 0
+            for k in range(K):
+                core += A[a, k] * B[b, k] * C[c, k]
+            for k in range(K):
+                temp = A[a, k] * B[b, k] * (core ** (beta - 1))
+                out[c, k] += temp
 
 
 def top_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
@@ -9,7 +96,7 @@ def top_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
     # In einstein notation with factor=2 this is 'az,bz,abc->cz'
     # However, you can use to your advantage that the
     # x_indices are sparesely defined as [a, b, c]
-    assert factor in (0, 1, 2), "Factor index must be < rank"
+    # assert factor in (0, 1, 2), "Factor index must be < rank"
     if factor == 0:
         for (a, b, c), val in zip(x_indices, x_vals):
             core = np.sum(A[a, :] * B[b, :] * C[c, :])
@@ -29,8 +116,9 @@ def top_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
 
 def bot_sparse3(x_indices, x_vals, out, beta, factor, A, B, C):
     # This is the same as top_ssparse but in this case
-    # we don't have the `val` term in the sum
-    assert factor in (0, 1, 2), "Factor index must be < rank"
+    # we don't have the `val` term in the sum and the exponent
+    # is ** (beta -1) instead of (beta -2 )
+    # assert factor in (0, 1, 2), "Factor index must be < rank"
     if factor == 0:
         for (a, b, c), val in zip(x_indices, x_vals):
             core = np.sum(A[a, :] * B[b, :] * C[c, :])

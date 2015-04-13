@@ -37,7 +37,7 @@ before_install:
 install:
     - conda create --yes -n testing python=$TRAVIS_PYTHON_VERSION
     - source activate testing
-    - conda install --yes numpy=$NUMPY_VERSION nose pip 
+    - conda install --yes numpy=$NUMPY_VERSION nose pip numba cython
 
 script:
     - ls

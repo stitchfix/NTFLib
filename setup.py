@@ -6,5 +6,5 @@ setuptools.setup(name='ntflib',
                  description='Non-negative Sparse Tensor Factorization Library',
                  long_description=open('README.md').read().strip(),
                  py_modules=['ntflib'],
-                 install_requires=['numpy'],
+                 install_requires=['numpy', 'numba'],
                  zip_safe=True)
