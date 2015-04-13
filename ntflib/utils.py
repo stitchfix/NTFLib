@@ -19,7 +19,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             b = x_indices[row, 1]
             c = x_indices[row, 2]
             val = x_vals[row]
-            core = 0.0
+            core = 1e-10
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -31,7 +31,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             b = x_indices[row, 1]
             c = x_indices[row, 2]
             val = x_vals[row]
-            core = 0.0
+            core = 1e-10
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -43,7 +43,7 @@ def top_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             b = x_indices[row, 1]
             c = x_indices[row, 2]
             val = x_vals[row]
-            core = 0.0
+            core = 1e-10
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -60,7 +60,7 @@ def bot_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             a = x_indices[row, 0]
             b = x_indices[row, 1]
             c = x_indices[row, 2]
-            core = 0
+            core = 1e-10
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -71,7 +71,7 @@ def bot_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             a = x_indices[row, 0]
             b = x_indices[row, 1]
             c = x_indices[row, 2]
-            core = 0
+            core = 1e-10
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
@@ -82,7 +82,7 @@ def bot_sparse3_numba(x_indices, x_vals, out, beta, factor, A, B, C):
             a = x_indices[row, 0]
             b = x_indices[row, 1]
             c = x_indices[row, 2]
-            core = 0
+            core = 1e-10
             for k in range(K):
                 core += A[a, k] * B[b, k] * C[c, k]
             for k in range(K):
