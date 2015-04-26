@@ -58,3 +58,9 @@ target/
 
 #PyCharm
 .idea/
+.idea
+.idea/*
+
+#vim
+*.swp*
+*/*.swp
