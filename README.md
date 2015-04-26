@@ -1,7 +1,7 @@
 # NTFLib
 Sparse Beta-Divergence Tensor Factorization Library
 
-![Build Status](https://api.travis-ci.org/cemoody/NTFLib.svg)
+![Build Status](https://api.travis-ci.org/stitchfix/NTFLib.svg)
 
 ![NTFLib](decomposition.png)
 
