@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 from . import utils
 
 # This is a form of Non-negative Tensor Factorization
@@ -10,6 +11,24 @@ from . import utils
 class BetaNTF():
     def __init__(self, shape, n_components=5, beta=1, n_iters=10,
                  verbose=True):
+        """
+        BetaNTF(shape, n_components=5, beta=1, n_iters=10, verbose=True)
+
+        shape: int (n_dimensions)
+        `shape` should have one entry for the number of unique elements
+        in each input dimension of the tensor. 
+
+        n_components: int  (default=5)
+        Number of components to use in the factorization of the input tensor.
+        The more components the better the fit, but (crudley speaking) the less
+        general your solution, and the more time it will take to compute.
+
+        beta: float (default=1)
+        The cost function is parameterized by beta such that beta=2 is
+        equivalent to Euclidean distance, beta=1 is the KL divergence, and
+        beta=0 Itakura-Saito divergence. 
+
+        """
         self.shape = shape
         self.n_components = n_components
         self.beta = np.float(beta)
@@ -26,14 +45,45 @@ class BetaNTF():
         E.g., for every dimension we have at least one
         observation. This is crucial to the factor updates
         we cannot tolerate a whole dimension with no data."""
+        msg = "Rank did not match shape; is column %i "
+        msg += "starting with zero and strictly contiguous integers?"
         for col in range(x_indices.shape[1]):
             rank = x_indices[:, col]
-            assert rank.max() + 1 == np.unique(rank).shape[0]
+            msg = msg % col
+            if rank.max() + 1 != np.unique(rank).shape[0]:
+                warnings.warn(msg)
         assert len(x_vals) == len(x_indices)
         assert np.all(np.isfinite(x_vals))
         assert np.all(x_vals >= 0)
 
     def fit(self, x_indices, x_vals):
+        """ 
+        fit(x_indices, x_vals)
+
+        Fit the tensor factors to a sparse tensor.
+        The coordinates of the non-missing values are given 
+        by `x_indices` and the values at those points are
+        give by `x_vals`.
+
+        For example, if a rating of 3.0 is given by user_id=3, movie=10
+        on date_id=30, then construct these arrays such that 
+        x_indices[0] = [3, 10, 30] and x_vals[0]=3.0. 
+
+        Note that the indices must be monotonic and contiguous --
+        there can be no missing "gaps" in the indices so that
+        np.unique(index) == index.max(). The indices must start at
+        zero.
+
+        Parameters
+        ----------
+        x_indices: np.int32 (n_row, n_dim) 
+        Coordinates at which `x_vals` occur. This is the
+        "address" of a cell in a tensor.
+
+        x_vals: np.float32 (n_row) 
+        The value of a cell in a tensor, e.g. the output 
+        rating of a user or item.
+        """
         eps = 1e-8
         # Reduce the cost in each iteration
         x_indices = x_indices.astype(np.int32)
