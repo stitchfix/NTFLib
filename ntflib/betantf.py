@@ -45,10 +45,10 @@ class BetaNTF():
         E.g., for every dimension we have at least one
         observation. This is crucial to the factor updates
         we cannot tolerate a whole dimension with no data."""
-        msg = "Rank did not match shape; is column %i "
-        msg += "starting with zero and strictly contiguous integers?"
         for col in range(x_indices.shape[1]):
             rank = x_indices[:, col]
+            msg = "Rank did not match shape; is column %i "
+            msg += "starting with zero and strictly contiguous integers?"
             msg = msg % col
             if rank.max() + 1 != np.unique(rank).shape[0]:
                 warnings.warn(msg)
